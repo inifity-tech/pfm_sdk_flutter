@@ -45,21 +45,23 @@ class _PFMSDKLauncherState extends State<PFMSDKLauncher> {
   @override
   Widget build(BuildContext context) {
     // _enableWebContentsDebugging();
-    return ValueListenableBuilder(
-      valueListenable: url,
-      builder: (BuildContext context, value, Widget? child) {
-        return url.value != null
-            ? PFMInAppWebViewWidget(
-                initialUrl: url.value ?? '',
-                onClosed: widget.onClosed,
-                onError: widget.onError,
-              )
-            : Center(
-                child: CircularProgressIndicator(
-                  color: Colors.blue,
-                ),
-              );
-      },
+    return Scaffold(
+      body: ValueListenableBuilder(
+        valueListenable: url,
+        builder: (BuildContext context, value, Widget? child) {
+          return url.value != null
+              ? PFMInAppWebViewWidget(
+                  initialUrl: url.value ?? '',
+                  onClosed: widget.onClosed,
+                  onError: widget.onError,
+                )
+              : Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.blue,
+                  ),
+                );
+        },
+      ),
     );
   }
 }
