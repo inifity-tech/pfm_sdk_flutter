@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:pfm_sdk_flutter/model/pfm_sdk_params.dart';
 import 'package:pfm_sdk_flutter/view/pfm_in_app_web_view_helper.dart';
 import 'package:flutter/material.dart';

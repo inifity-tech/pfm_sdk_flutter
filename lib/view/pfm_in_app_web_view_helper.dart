@@ -1,18 +1,50 @@
-import 'package:pfm_sdk_flutter/helper/web_view_settings_helper.dart';
 import 'package:pfm_sdk_flutter/model/event_response.dart';
-import 'package:pfm_sdk_flutter/view/i_webview.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-class PFMInAppWebViewWidget extends IWebView {
-  final ValueNotifier<InAppWebViewController?> _webViewController =
-      ValueNotifier(null);
+class PFMInAppWebViewWidget extends StatefulWidget {
+  final String initialUrl;
+  final Function(dynamic) onClosed;
+  final Function(dynamic) onError;
 
   PFMInAppWebViewWidget({
-    required super.initialUrl,
-    required super.onClosed,
-    required super.onError,
+    required this.initialUrl,
+    required this.onClosed,
+    required this.onError,
   });
+
+  @override
+  State<PFMInAppWebViewWidget> createState() => _PFMInAppWebViewWidgetState();
+}
+
+class _PFMInAppWebViewWidgetState extends State<PFMInAppWebViewWidget> {
+  late WebViewController controller;
+
+  @override
+  void initState() {
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.contains('/pfm/close')) {
+              _handleSdkEvents(request.url, context);
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.initialUrl));
+    super.initState();
+  }
 
   // SDK Event Handling
   void _handleSdkEvents(String url, BuildContext context) {
@@ -23,7 +55,7 @@ class PFMInAppWebViewWidget extends IWebView {
         final status = uri.queryParameters['status'];
         final statusCode = uri.queryParameters['status_code'];
         if (status == "ERROR") {
-          onError.call(
+          widget.onError.call(
             EventResponse(
                     status: 'ERROR',
                     message: message,
@@ -32,7 +64,7 @@ class PFMInAppWebViewWidget extends IWebView {
                 .toJson(),
           );
         } else if (url.contains('CLOSED')) {
-          onClosed.call(EventResponse(
+          widget.onClosed.call(EventResponse(
                   status: 'CLOSED',
                   message: message,
                   eventType: "PFM_SDK_CALLBACK",
@@ -41,7 +73,7 @@ class PFMInAppWebViewWidget extends IWebView {
         }
       }
     } catch (e) {
-      onError.call(
+      widget.onError.call(
         EventResponse(
                 status: 'ERROR',
                 eventType: "PFM_SDK_CALLBACK",
@@ -68,12 +100,11 @@ class PFMInAppWebViewWidget extends IWebView {
           TextButton(
             child: const Text('Yes'),
             onPressed: () {
-              onError.call(
+              widget.onError.call(
                 EventResponse(
                   status: 'CLOSED',
                 ).toJson(),
               );
-              Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
           ),
@@ -81,8 +112,6 @@ class PFMInAppWebViewWidget extends IWebView {
       ),
     );
   }
-
-  final GlobalKey _webViewKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -92,31 +121,7 @@ class PFMInAppWebViewWidget extends IWebView {
         if (didPop) return;
         await _showExitDialog(context);
       },
-      child: Scaffold(
-        body: SafeArea(
-          child: Stack(
-            children: [
-              InAppWebView(
-                key: _webViewKey,
-                initialUrlRequest: URLRequest(url: WebUri(initialUrl)),
-                initialSettings: getWebViewOptions(),
-                onWebViewCreated: (controller) {
-                  _webViewController.value = controller;
-                },
-                shouldOverrideUrlLoading: (controller, navigationAction) async {
-                  final url = navigationAction.request.url.toString();
-                  print("Redirection URL ---->$url");
-                  if (url.contains('/pfm/close')) {
-                    _handleSdkEvents(url, context);
-                    return NavigationActionPolicy.CANCEL;
-                  }
-                  return NavigationActionPolicy.ALLOW;
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      child: WebViewWidget(controller: controller),
     );
   }
 }
