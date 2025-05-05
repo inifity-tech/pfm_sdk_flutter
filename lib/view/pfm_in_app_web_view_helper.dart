@@ -24,6 +24,7 @@ class _PFMInAppWebViewWidgetState extends State<PFMInAppWebViewWidget> {
   void initState() {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..enableZoom(false)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
