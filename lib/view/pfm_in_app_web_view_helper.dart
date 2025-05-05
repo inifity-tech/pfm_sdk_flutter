@@ -100,11 +100,12 @@ class _PFMInAppWebViewWidgetState extends State<PFMInAppWebViewWidget> {
           TextButton(
             child: const Text('Yes'),
             onPressed: () {
-              widget.onError.call(
+              widget.onClosed.call(
                 EventResponse(
                   status: 'CLOSED',
                 ).toJson(),
               );
+              Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
           ),
