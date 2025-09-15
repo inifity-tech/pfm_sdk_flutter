@@ -3,6 +3,7 @@ import 'package:pfm_sdk_flutter/model/event_response.dart';
 import 'package:pfm_sdk_flutter/view/i_webview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PFMInAppWebViewWidget extends IWebView {
   final ValueNotifier<InAppWebViewController?> _webViewController =
@@ -13,6 +14,28 @@ class PFMInAppWebViewWidget extends IWebView {
     required super.onClosed,
     required super.onError,
   });
+
+  Future<NavigationActionPolicy?> _handleExternalUrl(
+      InAppWebViewController controller,
+      NavigationAction navigationAction,
+      BuildContext context) async {
+    final url = navigationAction.request.url.toString();
+    print("Redirection URL ---->$url");
+    if (url.contains("https://www.tatamutualfund.com/raise-query") ||
+        url.contains("https://aa-uat.onemoney.in/")) {
+      try {
+        launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        return NavigationActionPolicy.CANCEL;
+      } catch (e) {
+        return NavigationActionPolicy.ALLOW;
+      }
+    }
+    if (url.contains('/pfm/close')) {
+      _handleSdkEvents(url, context);
+      return NavigationActionPolicy.CANCEL;
+    }
+    return NavigationActionPolicy.ALLOW;
+  }
 
   // SDK Event Handling
   void _handleSdkEvents(String url, BuildContext context) {
@@ -103,15 +126,8 @@ class PFMInAppWebViewWidget extends IWebView {
                 onWebViewCreated: (controller) {
                   _webViewController.value = controller;
                 },
-                shouldOverrideUrlLoading: (controller, navigationAction) async {
-                  final url = navigationAction.request.url.toString();
-                  print("Redirection URL ---->$url");
-                  if (url.contains('/pfm/close')) {
-                    _handleSdkEvents(url, context);
-                    return NavigationActionPolicy.CANCEL;
-                  }
-                  return NavigationActionPolicy.ALLOW;
-                },
+                shouldOverrideUrlLoading: (controller, navigationAction) =>
+                    _handleExternalUrl(controller, navigationAction, context),
               ),
             ],
           ),
