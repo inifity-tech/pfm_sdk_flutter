@@ -59,8 +59,13 @@ class _HomePageState extends State<HomePage> {
 
       final Map<String, Object> bodyParams = {
         "reference_id": refID,
-        "exchange_application_id": "pfm.equal.pidg_testing",
-        "user_profile": {"mobile_number": mobile_number}
+        "exchange_application_id": "pfm.equal.tata_amc_uat",
+        "user_profile": {
+          "mobile_number": mobile_number,
+          "name": "Dummy name",
+          "dob": "18-01-1990",
+          "pan": "RQNPS9280W"
+        }
       };
 
       // Basic Authentication credentials
@@ -133,10 +138,7 @@ class _HomePageState extends State<HomePage> {
                         "";
                     PFMSDK.instance.launchSDK(
                       context: context,
-                      pfmSdkConfig: PFMSDKConfig(
-                        token:
-                            "eyJhbGciOiJSUzI1NiJ9.eyJ0cmFuc2FjdGlvbl9pZCI6ImQ0Yzg5OTFjLWI5ZjAtNDU0OS05YjNmLWE3M2Y5YzkwNjRlNSIsImlzcyI6Imh0dHBzOi8vcGZtLmVxdWFsLmluIiwiZXhwIjoxNzQ0NjA3NTk3LCJyZXF1ZXN0X2lkIjoiNDYyNTFkYTctZjNjNi00YjcxLWJlODItNTQ3NzRkYTk3OTg4IiwiaWF0IjoxNzQ0MDA3NTk3fQ.VR-GhEfC6y4Xs4IO4nl9VE_YcFT6Yvs82YaaZXs6SW7d4D5MFCKMlyirzyQ58oKYoxvd1rM1rAYBcuoA6f5QArbCONhNMooB8850uknn6MempMU_B5faZhheTv1dZDtv0ixoic8LwyIJk_g5wiZh24iW1yTaDLOxzLF8MGef8ZHwjdCbV5_G0aVWQ29_FDRcUXjawAoNHVCbTgYr-zUhIRSD5CLDymOREjCrwMIeW1aR2li9wD3lbZIz1EoG520Ua9RAUfrB3raJKy4_QjlC5KX9HQc7tQDXnexRG-3Y7iiZLUo-E5HgDcIyg3dpVdnI3eZU7j_D1nrt3xNrmZMVUA",
-                      ),
+                      pfmSdkConfig: PFMSDKConfig(token: token),
                       onClosed: (data) {
                         _sdkResponse.value = data;
                       },
